@@ -1,4 +1,5 @@
 import click, pytest, sys
+from sqlalchemy.orm import with_polymorphic
 from flask.cli import with_appcontext, AppGroup
 
 from App.database import db, get_migrate
@@ -17,7 +18,12 @@ migrate = get_migrate(app)
 def init():
     db.drop_all()
     db.create_all()
-    create_user('bob', 'bob')
+    create_user('bob', 'bobpass')
+    jimbo = Student(username='jimbo', password='jimbopass', firstName='Jimbo', lastName='Jenkins')
+    steve = Staff(username='steve', password='stevepass')
+    grolnok = Employer(username='grolnok', password='grolnokpass', orgName='Grolnok Inc.')
+    db.session.add_all([jimbo, steve, grolnok])
+    db.session.commit()
     print('database intialized')
 
 '''
@@ -42,15 +48,53 @@ def create_user_command(username, password):
 
 # this command will be : flask user create bob bobpass
 
+#I want to list all user types in the db
 @user_cli.command("list", help="Lists users in the database")
-@click.argument("format", default="string")
-def list_user_command(format):
-    if format == 'string':
-        print(get_all_users())
-    else:
-        print(get_all_users_json())
+def list_user_command():
+    from sqlalchemy.orm import with_polymorphic
+    UserPoly = with_polymorphic(User, [Student, Staff, Employer])
+    users = db.session.scalars(db.select(UserPoly)).all()
+    for user in users:
+        print(user)
+
 
 app.cli.add_command(user_cli) # add the group to the cli
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 '''
 Test Commands

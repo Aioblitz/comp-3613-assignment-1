@@ -18,7 +18,7 @@ def get_all_users():
     return db.session.scalars(db.select(User)).all()
 
 def get_all_users_json():
-    users = get_all_users()
+    users = db.session.scalars(db.select(User)).all()
     if not users:
         return []
     users = [user.get_json() for user in users]
