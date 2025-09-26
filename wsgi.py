@@ -2,9 +2,9 @@ import click, pytest, sys
 from flask.cli import with_appcontext, AppGroup
 
 from App.database import db, get_migrate
-from App.models import User
+from App.models import User, Student, Staff, Employer, Job, Application
 from App.main import create_app
-from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize )
+from App.controllers import ( create_user, get_all_users_json, get_all_users )
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -15,7 +15,9 @@ migrate = get_migrate(app)
 # This command creates and initializes the database
 @app.cli.command("init", help="Creates and initializes the database")
 def init():
-    initialize()
+    db.drop_all()
+    db.create_all()
+    create_user('bob', 'bob')
     print('database intialized')
 
 '''
@@ -23,7 +25,9 @@ User Commands
 '''
 
 # Commands can be organized using groups
-
+staff_cli = AppGroup('staff', help='Staff object commands')
+student_cli = AppGroup('student', help='Student object commands') 
+employer_cli = AppGroup('employer', help='Employer object commands')  
 # create a group, it would be the first argument of the comand
 # eg : flask user <command>
 user_cli = AppGroup('user', help='User object commands') 
