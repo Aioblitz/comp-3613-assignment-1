@@ -14,4 +14,4 @@ class Employer(User):
         self.orgName = orgName
 
     def __repr__(self):
-        return f'<Employer {self.orgName}>'
+        return f'<Employer {self.id} {self.orgName}>'

@@ -16,4 +16,4 @@ class Student(User):
         self.lastName = lastName
 
     def __repr__(self):
-        return f'<Student {self.firstName} {self.lastName}>'
+        return f'<Student {self.id} {self.firstName} {self.lastName}>'

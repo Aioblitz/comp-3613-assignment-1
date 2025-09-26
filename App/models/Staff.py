@@ -11,4 +11,4 @@ class Staff(User):
         super().__init__(username, password)
 
     def __repr__(self):
-        return f'<Staff {self.username}>'
+        return f'<Staff {self.id} {self.username}>'
