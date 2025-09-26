@@ -1,4 +1,6 @@
 import click, pytest, sys
+from rich.console import Console
+from rich.table import Table
 from sqlalchemy.orm import with_polymorphic
 from flask.cli import with_appcontext, AppGroup
 
@@ -39,20 +41,34 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 #staff adds a student to a job's shortlist
 @staff_cli.command("shortlist", help="Shortlist a student for a job")
 def shortlist_student_command():
-    #lists jobs
+    # List jobs in a rich table
     jobs = db.session.scalars(db.select(Job)).all()
+    job_table = Table(title="Jobs")
+    job_table.add_column("ID", style="cyan", no_wrap=True)
+    job_table.add_column("Title", style="magenta")
+    job_table.add_column("Description", style="green")
     for job in jobs:
-         print(job)
+        job_table.add_row(str(job.id), job.title, job.description)
+    console = Console()
+    console.print(job_table)
+
     job_id = click.prompt("Enter the job ID to shortlist a student for", type=int)
-    #lists students who are not yet shortlisted for the job
+
+    # List students not yet shortlisted for the job in a rich table
     not_shortlisted = db.select(Application.student_id).filter_by(job_id=job_id)
     students = db.session.scalars(db.select(Student).filter(~Student.id.in_(not_shortlisted))).all()
     if not students:
         print(f'All students are already shortlisted for job ID {job_id}')
         return
-    print(f'Students not yet shortlisted for job ID {job_id}:')
+    student_table = Table(title=f"Students not yet shortlisted for job ID {job_id}")
+    student_table.add_column("ID", style="cyan", no_wrap=True)
+    student_table.add_column("First Name", style="magenta")
+    student_table.add_column("Last Name", style="green")
+    student_table.add_column("Username", style="yellow")
     for student in students:
-        print(student)
+        student_table.add_row(str(student.id), student.firstName, student.lastName, student.username)
+    console.print(student_table)
+
     #Choose student to shortlist
     student_id = click.prompt("Enter the student ID to shortlist", type=int)
     new_application = Application(job_id=job_id, student_id=student_id)
@@ -69,17 +85,31 @@ student_cli = AppGroup('student', help='Student object commands')
 
 @student_cli.command("list", help="Lists shortlisted positions for student")
 def list_student_shortlist_command():
+    # List all students in a rich table
     students = db.session.scalars(db.select(Student)).all()
+    student_table = Table(title="Students")
+    student_table.add_column("ID", style="cyan", no_wrap=True)
+    student_table.add_column("First Name", style="magenta")
+    student_table.add_column("Last Name", style="green")
+    student_table.add_column("Username", style="yellow")
     for student in students:
-        print(student)
+        student_table.add_row(str(student.id), student.firstName, student.lastName, student.username)
+    console = Console()
+    console.print(student_table)
+
     student_id = click.prompt("Enter your student ID to view your shortlisted positions", type=int)
     applications = db.session.scalars(db.select(Application).filter_by(student_id=student_id)).all()
     if not applications:
         print(f'No shortlisted positions found for student ID {student_id}')
         return
-    print(f'Shortlisted positions for student ID {student_id}:')
+    app_table = Table(title=f"Shortlisted positions for student ID {student_id}")
+    app_table.add_column("Application ID", style="cyan", no_wrap=True)
+    app_table.add_column("Job Title", style="magenta")
+    app_table.add_column("Status", style="green")
     for application in applications:
-        print(application)
+        job_title = application.job.title if application.job else 'Unknown'
+        app_table.add_row(str(application.application_id), job_title, application.status)
+    console.print(app_table)
     
 app.cli.add_command(student_cli)
 
@@ -87,19 +117,33 @@ employer_cli = AppGroup('employer', help='Employer object commands')
 
 @employer_cli.command("change-status", help="Change application status")
 def change_application_status():
-    #lists jobs
+    # List jobs in a rich table
     jobs = db.session.scalars(db.select(Job)).all()
+    job_table = Table(title="Jobs")
+    job_table.add_column("ID", style="cyan", no_wrap=True)
+    job_table.add_column("Title", style="magenta")
+    job_table.add_column("Description", style="green")
     for job in jobs:
-        print(job)
+        job_table.add_row(str(job.id), job.title, job.description)
+    console = Console()
+    console.print(job_table)
+
     job_id = click.prompt("Enter the job ID", type=int)
-    #lists applications for the job
+
+    # List applications for the job in a rich table
     applications = db.session.scalars(db.select(Application).filter_by(job_id=job_id)).all()
     if not applications:
         print(f'No applications found for job ID {job_id}')
         return
-    print(f'Applications for job ID {job_id}:')
+    app_table = Table(title=f"Applications for job ID {job_id}")
+    app_table.add_column("Application ID", style="cyan", no_wrap=True)
+    app_table.add_column("Student Name", style="magenta")
+    app_table.add_column("Status", style="green")
     for application in applications:
-        print(application)
+        student_name = f'{application.student.firstName} {application.student.lastName}' if application.student else 'Unknown'
+        app_table.add_row(str(application.application_id), student_name, application.status)
+    console.print(app_table)
+
     #Choose application to change status
     application_id = click.prompt("Enter the application ID to change status for", type=int)
     application = db.session.scalars(db.select(Application).filter_by(application_id=application_id)).first()
@@ -116,8 +160,14 @@ def change_application_status():
 @employer_cli.command("create", help="Create a new job posting")
 def create_job_command():
     employers = db.session.scalars(db.select(Employer)).all()
+    table = Table(title="Employers")
+    table.add_column("ID", style="cyan", no_wrap=True)
+    table.add_column("Username", style="magenta")
+    table.add_column("Organization Name", style="green")
     for employer in employers:
-        print(employer)
+        table.add_row(str(employer.id), employer.username, employer.orgName)
+    console = Console()
+    console.print(table)
 
     employer_id = click.prompt("Enter your employer ID", type=int)
     title = click.prompt("Enter the job title", type=str)
