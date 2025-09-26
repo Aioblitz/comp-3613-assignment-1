@@ -83,7 +83,3 @@ Lists all jobs in the database, showing job details and employer organization na
 ```shell
 flask user list-jobs
 ```
-
----
-# Flask Commands
-
