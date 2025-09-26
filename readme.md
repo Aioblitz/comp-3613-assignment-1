@@ -1,27 +1,21 @@
 ## CLI Usage Guide
+The general flow of what needs to be done are listed below for the 4 main features needed. Each command prompts the users to look at the terminal and provide input accordingly.
 
+#### Create a New Job Posting
 
-### General Format
-
-```shell
-flask <group> <command> [arguments]
-```
-
----
-
-### Student Commands
-
-#### List Shortlisted Positions
-
-Lists all students, prompts for your student ID, then displays jobs you are shortlisted for.
+Lists all employers, prompts for your employer ID, job title, and description, then creates the job.
 
 ```shell
-flask student list
+flask employer create
 ```
+sample input for testing based on freshly initialised db
 
+ ```shell
+5
+CSR
+Customer Sales Representative
+```
 ---
-
-### Staff Commands
 
 #### Shortlist a Student for a Job
 
@@ -33,8 +27,6 @@ flask staff shortlist
 
 ---
 
-### Employer Commands
-
 #### Change Application Status
 
 Lists all jobs, prompts for a job ID, then lists applications for that job. Prompts for a student ID and new status (`accepted` or `rejected`).
@@ -43,16 +35,18 @@ Lists all jobs, prompts for a job ID, then lists applications for that job. Prom
 flask employer change-status
 ```
 
-#### Create a New Job Posting
+---
 
-Lists all employers, prompts for your employer ID, job title, and description, then creates the job.
+#### List Shortlisted Positions
+
+Lists all students, prompts for your student ID, then displays jobs you are shortlisted for.
 
 ```shell
-flask employer create
+flask student list
 ```
 
 ---
-
+### Misc Commands
 #### List All Users
 
 Lists all users in the database, showing their correct type (Student, Staff, Employer).
