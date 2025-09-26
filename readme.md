@@ -8,7 +8,7 @@ Lists all employers, prompts for your employer ID, job title, and description, t
 ```shell
 flask employer create
 ```
-sample input for testing based on freshly initialised db
+Sample input for testing based on freshly initialised db.
 
  ```shell
 5
@@ -25,6 +25,13 @@ Lists all jobs, prompts for a job ID, then lists students not yet shortlisted fo
 flask staff shortlist
 ```
 
+Sample input for testing based on following the previous step.
+
+ ```shell
+1 or 2
+2 or 3
+```
+
 ---
 
 #### Change Application Status
@@ -35,6 +42,14 @@ Lists all jobs, prompts for a job ID, then lists applications for that job. Prom
 flask employer change-status
 ```
 
+Sample input for testing based on following the previous step.
+
+ ```shell
+1 or 2
+2 
+accepted
+```
+
 ---
 
 #### List Shortlisted Positions
@@ -43,6 +58,12 @@ Lists all students, prompts for your student ID, then displays jobs you are shor
 
 ```shell
 flask student list
+```
+
+Sample input for testing based on following the previous step.
+
+ ```shell
+2 or 3
 ```
 
 ---

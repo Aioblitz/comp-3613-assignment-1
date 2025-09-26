@@ -23,7 +23,7 @@ def init():
     nami = Student(username='nami', password='namipass', firstName='Nami', lastName='Leon')
     steve = Staff(username='steve', password='stevepass')
     grolnok = Employer(username='grolnok', password='grolnokpass', orgName='Grolnok Inc.')
-    tsa = Job(title='TSA', description='Technical Systems Analyst', employer_id=4)
+    tsa = Job(title='TSA', description='Technical Systems Analyst', employer_id=5)
     jimShortList = Application(job_id=1, student_id=2)
     db.session.add_all([jimbo, nami, steve, grolnok,tsa,jimShortList])
     db.session.commit()
@@ -101,17 +101,17 @@ def change_application_status():
     for application in applications:
         print(application)
     #Choose application to change status
-    student_id = click.prompt("Enter the student ID to change status for", type=int)
-    application = db.session.scalars(db.select(Application).filter_by(job_id=job_id, student_id=student_id)).first()
+    application_id = click.prompt("Enter the application ID to change status for", type=int)
+    application = db.session.scalars(db.select(Application).filter_by(application_id=application_id)).first()
     if not application:
-        print(f'No application found for student ID {student_id} and job ID {job_id}')
+        print(f'No application found for application ID {application_id}')
         return
     #Change status
     new_status = click.prompt("Enter the new status", type=click.Choice(['accepted', 'rejected']))
 
     application.status = new_status
     db.session.commit()
-    print(f'Application status updated to "{new_status}" for student ID {student_id} and job ID {job_id}')
+    print(f'Application status updated to "{new_status}" for application ID {application_id} and job ID {job_id}')
 
 @employer_cli.command("create", help="Create a new job posting")
 def create_job_command():
