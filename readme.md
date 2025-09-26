@@ -1,6 +1,5 @@
 ## CLI Usage Guide
 
-All commands are run using the Flask CLI. Make sure your virtual environment is activated and you are in your project directory.
 
 ### General Format
 
