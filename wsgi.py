@@ -29,7 +29,7 @@ def init():
     jimShortList = Application(job_id=1, student_id=2)
     db.session.add_all([jimbo, nami, steve, grolnok,tsa,jimShortList])
     db.session.commit()
-    print('database intialized')
+    print('\n\n database intialized')
 
 '''
 User Commands
