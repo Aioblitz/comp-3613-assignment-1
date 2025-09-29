@@ -29,7 +29,7 @@ def init():
     jimShortList = Application(job_id=1, student_id=2)
     db.session.add_all([jimbo, nami, steve, grolnok,tsa,jimShortList])
     db.session.commit()
-    print('\n\n database intialized')
+    print('\n\ndatabase intialized')
 
 '''
 User Commands
@@ -38,10 +38,9 @@ User Commands
 # Commands can be organized using groups
 staff_cli = AppGroup('staff', help='Staff object commands')
 
-#staff adds a student to a job's shortlist
+
 @staff_cli.command("shortlist", help="Shortlist a student for a job")
 def shortlist_student_command():
-    # List jobs in a rich table
     jobs = db.session.scalars(db.select(Job)).all()
     job_table = Table(title="Jobs")
     job_table.add_column("ID", style="cyan", no_wrap=True)
@@ -54,7 +53,6 @@ def shortlist_student_command():
 
     job_id = click.prompt("Enter the job ID to shortlist a student for", type=int)
 
-    # List students not yet shortlisted for the job in a rich table
     not_shortlisted = db.select(Application.student_id).filter_by(job_id=job_id)
     students = db.session.scalars(db.select(Student).filter(~Student.id.in_(not_shortlisted))).all()
     if not students:
@@ -69,7 +67,6 @@ def shortlist_student_command():
         student_table.add_row(str(student.id), student.firstName, student.lastName, student.username)
     console.print(student_table)
 
-    #Choose student to shortlist
     student_id = click.prompt("Enter the student ID to shortlist", type=int)
     new_application = Application(job_id=job_id, student_id=student_id)
     db.session.add(new_application)
@@ -85,7 +82,6 @@ student_cli = AppGroup('student', help='Student object commands')
 
 @student_cli.command("list", help="Lists shortlisted positions for student")
 def list_student_shortlist_command():
-    # List all students in a rich table
     students = db.session.scalars(db.select(Student)).all()
     student_table = Table(title="Students")
     student_table.add_column("ID", style="cyan", no_wrap=True)
@@ -130,7 +126,6 @@ def change_application_status():
 
     job_id = click.prompt("Enter the job ID", type=int)
 
-    # List applications for the job in a rich table
     applications = db.session.scalars(db.select(Application).filter_by(job_id=job_id)).all()
     if not applications:
         print(f'No applications found for job ID {job_id}')
@@ -144,13 +139,12 @@ def change_application_status():
         app_table.add_row(str(application.application_id), student_name, application.status)
     console.print(app_table)
 
-    #Choose application to change status
     application_id = click.prompt("Enter the application ID to change status for", type=int)
     application = db.session.scalars(db.select(Application).filter_by(application_id=application_id)).first()
     if not application:
         print(f'No application found for application ID {application_id}')
         return
-    #Change status
+    
     new_status = click.prompt("Enter the new status", type=click.Choice(['accepted', 'rejected']))
 
     application.status = new_status
@@ -177,6 +171,60 @@ def create_job_command():
     db.session.commit()
     print(f'Job "{title}" created with ID {new_job.id} for employer ID {employer_id}')
     
+
+@employer_cli.command("edit", help="Edit an existing job posting")
+def edit_job_command():
+    employers = db.session.scalars(db.select(Employer)).all()
+    table = Table(title="Employers")
+    table.add_column("ID", style="cyan", no_wrap=True)
+    table.add_column("Username", style="magenta")
+    table.add_column("Organization Name", style="green")
+    for employer in employers:
+        table.add_row(str(employer.id), employer.username, employer.orgName)
+    console = Console()
+    console.print(table)
+
+    employer_id = click.prompt("Enter your employer ID", type=int)
+    jobs = db.session.scalars(db.select(Job).filter_by(employer_id=employer_id)).all()
+    if not jobs:
+        print(f'No jobs found for employer ID {employer_id}')
+        return
+    job_table = Table(title=f"Jobs for employer ID {employer_id}")
+    job_table.add_column("ID", style="cyan", no_wrap=True)
+    job_table.add_column("Title", style="magenta")
+    job_table.add_column("Description", style="green")
+    for job in jobs:
+        job_table.add_row(str(job.id), job.title, job.description)
+    console.print(job_table)
+    job_id = click.prompt("Enter the job ID to edit", type=int)
+    job = db.session.scalars(db.select(Job).filter_by(id=job_id, employer_id=employer_id)).first()
+    if not job:
+        print(f'No job found with ID {job_id} for employer ID {employer_id}')
+        return
+    
+    while True:
+        action_table = Table(title="Edit Actions")
+        action_table.add_column("Option", style="cyan", no_wrap=True)
+        action_table.add_column("Action", style="magenta")
+        action_table.add_row("1", "Edit Title")
+        action_table.add_row("2", "Edit Description")
+        action_table.add_row("3", "Finish/Exit")
+        console.print(action_table)
+        action = click.prompt("Select an option (1, 2, or 3)", type=str)
+        if action == '1':
+            new_title = click.prompt("Enter the new job title", type=str)
+            job.title = new_title
+            db.session.commit()
+            print(f'Job ID {job_id} title updated to "{new_title}"')
+        elif action == '2':
+            new_description = click.prompt("Enter the new job description", type=str)
+            job.description = new_description
+            db.session.commit()
+            print(f'Job ID {job_id} description updated.')
+        elif action == '3':
+            break
+        else:
+            print("Invalid option. Please enter 1, 2, or 3.")
     
 
 app.cli.add_command(employer_cli)
@@ -193,10 +241,7 @@ def create_user_command(username, password):
     create_user(username, password)
     print(f'{username} created!')
 
-# this command will be : flask user create bob bobpass
-
-#I want to list all user types in the db
-@user_cli.command("list", help="Lists users in the database")
+@user_cli.command("list-users", help="Lists users in the database")
 def list_user_command():
     UserPoly = with_polymorphic(User, [Student, Staff, Employer])
     users = db.session.scalars(db.select(UserPoly)).all()
@@ -207,8 +252,16 @@ def list_user_command():
 @user_cli.command("list-jobs", help="Lists jobs in the database")
 def list_jobs_command():
     jobs = db.session.scalars(db.select(Job)).all()
+    job_table = Table(title="Jobs")
+    job_table.add_column("ID", style="cyan", no_wrap=True)
+    job_table.add_column("Title", style="magenta")
+    job_table.add_column("Description", style="green")
+    job_table.add_column("Employer", style="yellow")
     for job in jobs:
-        print(job)
+        employer_name = job.employer.orgName if job.employer and hasattr(job.employer, 'orgName') else 'Unknown'
+        job_table.add_row(str(job.id), job.title, job.description, employer_name)
+    console = Console()
+    console.print(job_table)
 
 
 app.cli.add_command(user_cli) # add the group to the cli

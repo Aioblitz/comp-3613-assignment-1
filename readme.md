@@ -68,12 +68,21 @@ Sample input for testing based on following the previous step.
 
 ---
 ### Misc Commands
+
+#### Edit Jobs 
+
+Edits the title and description of a given job to user specified values
+
+```shell
+flask employer edit
+```
+
 #### List All Users
 
 Lists all users in the database, showing their correct type (Student, Staff, Employer).
 
 ```shell
-flask user list
+flask user list-users
 ```
 
 #### List All Jobs
